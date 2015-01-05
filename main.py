@@ -18,8 +18,8 @@ class Card(pygame.sprite.Sprite):
                 front_image = ss.image_at((48 * x, 64 * y, 48, 64))
                 back_image = ss.image_at((48 * 3,64 * 5, 48, 64))
 		
-                self.width = 80
-                self.height = 110
+                self.width = 50
+                self.height = 75
 
 		self.front_image = pygame.transform.scale(front_image,(self.width,self.height)) 
 		self.back_image = pygame.transform.scale(back_image,(self.width,self.height)) 
@@ -53,9 +53,8 @@ class Memory:
 		
 		self.player_number = 0
 		self.cpu_number = 0
+                self.screen = pygame.display.set_mode((840,580))
 
-		self.screen = pygame.display.set_mode(size)
-		
 	def makeCards(self,ss):
 
 		for j in range(0,6):
@@ -71,10 +70,14 @@ class Memory:
 		for j in range(0,5):
 			for i in range(0,13):
 				if (j*13+i) <= 51:
-					card = self.card_lst[j*13+i]  
-					card.rect.topleft = [50+48*i+i*card.width,50+64*j+j*card.height]				
+					self.card_lst[j*13+i].rect.topleft = [25+48*i+i*card.width/5,25+64*j+j*card.height/4]				
 
-	def selectCard(self):
+        def updateLst(self):
+            self.card_lst = []
+            for card in cards:
+                self.card_lst.append(card) 
+
+	def selectCard(self,first_card):
 		while 1:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT: sys.exit()
@@ -82,16 +85,16 @@ class Memory:
 					pos = pygame.mouse.get_pos()
 				#turn card	
 					for card in cards:	
-						if card.rect.collidepoint(pos):
+						if card.rect.collidepoint(pos) and not(first_card == card):
 							card.turn()
 
 							return card
 	def player(self):
-		card1 = self.selectCard()
+		card1 = self.selectCard(False)
 		cards.draw(self.screen)
 		pygame.display.flip()
 
-		card2 = self.selectCard()
+		card2 = self.selectCard(card1)
 		cards.draw(self.screen)
 		pygame.display.flip()
 
@@ -100,6 +103,10 @@ class Memory:
 			cards.remove(card1)
 			cards.remove(card2)
 			self.player_number += 2
+
+                        cards.draw(self.screen)
+		        pygame.display.flip()
+
 
 		else:	
 			card1.turn()
@@ -113,6 +120,7 @@ class Memory:
 		card1 = copy_cards[random.choice(range(len(copy_cards)))]
 		card1.turn()
 		cards.draw(self.screen)
+                print card1.number
 		pygame.display.flip()
 		time.sleep(0.5)
 
@@ -120,49 +128,61 @@ class Memory:
 
 		card2 = copy_cards[random.choice(range(len(copy_cards)))]
 		card2.turn()
+                print card2.number
 		cards.draw(self.screen)
 		pygame.display.flip()
-		time.sleep(1)
+		time.sleep(0.5)
 
 
 		if card1.number == card2.number:
 			cards.remove(card1)
 			cards.remove(card2)
 			self.cpu_number += 2
+                        cards.draw(self.screen)
+			pygame.display.flip()
 
 		else:	
 			card1.turn()
 			card2.turn()
+		        cards.draw(self.screen)
+			pygame.display.flip()
 
+        def _update(self):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT: sys.exit()
+
+            text1 = Text('player '+str(self.player_number),[500,400])
+            text1.draw(self.screen)
+
+	    text2 = Text('cpu '+str(self.cpu_number),[500,450])
+	    text2.draw(self.screen)
+
+
+            self.cpu()	
+
+            pygame.display.flip()
+
+            time.sleep(0.5)
+            self.player()	
+            time.sleep(1)
+
+            self.updateLst()
 
 	def _run(self):
 	
 		ss = spritesheet.spritesheet('./img/trump.png')
 	        self.makeCards(ss)
 
-		while 1:
-			for event in pygame.event.get():
-				if event.type == pygame.QUIT: sys.exit()
-		
-			self.screen.fill(self.black)
+                self.screen.fill(self.black)
 				
-			text1 = Text('player '+str(self.player_number),[800,800])
-			text1.draw(self.screen)
-
-			text2 = Text('cpu '+str(self.cpu_number),[800,850])
-			text2.draw(self.screen)
-
-
-			cards.draw(self.screen)
-
-			pygame.display.flip()
+		
+		while 1:
+                    self._update()
+                    if cards == False:
+                        break
 	
-			self.player()	
-			time.sleep(1)
-			self.cpu()	
-
-			if cards == False:
-				break
+        
+            
 def main():
 	while 1:
         	Memory()._run()
