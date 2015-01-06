@@ -55,6 +55,11 @@ class Memory:
 		self.cpu_number = 0
                 self.screen = pygame.display.set_mode((840,580))
 
+                self.text1 = Text('player '+str(self.player_number),[500,400])
+
+	        self.text2 = Text('cpu '+str(self.cpu_number),[500,450])
+
+
 	def makeCards(self,ss):
 
 		for j in range(0,6):
@@ -89,28 +94,35 @@ class Memory:
 							card.turn()
 
 							return card
+        def draw_all(self):
+
+            self.screen.fill(self.black)
+            self.text1.draw(self.screen)
+            self.text2.draw(self.screen)
+            cards.draw(self.screen)
+	    pygame.display.flip()
+
 	def player(self):
 		card1 = self.selectCard(False)
-		cards.draw(self.screen)
-		pygame.display.flip()
-
+		self.draw_all()
+		
 		card2 = self.selectCard(card1)
-		cards.draw(self.screen)
-		pygame.display.flip()
-
-
+		self.draw_all()
+		time.sleep(0.5)
+                
 		if card1.number == card2.number:
 			cards.remove(card1)
 			cards.remove(card2)
 			self.player_number += 2
-
-                        cards.draw(self.screen)
-		        pygame.display.flip()
-
-
+                        self.text1 = Text('player '+str(self.player_number),[500,400])
 		else:	
 			card1.turn()
 			card2.turn()
+
+                self.updateLst()
+		self.draw_all()
+                if self.card_lst == False:
+                        break
 
 
 	def cpu(self):
@@ -119,72 +131,64 @@ class Memory:
 
 		card1 = copy_cards[random.choice(range(len(copy_cards)))]
 		card1.turn()
-		cards.draw(self.screen)
-                print card1.number
-		pygame.display.flip()
+		self.draw_all()
 		time.sleep(0.5)
 
 		copy_cards.remove(card1)
 
 		card2 = copy_cards[random.choice(range(len(copy_cards)))]
 		card2.turn()
-                print card2.number
-		cards.draw(self.screen)
-		pygame.display.flip()
+		self.draw_all()
 		time.sleep(0.5)
-
 
 		if card1.number == card2.number:
 			cards.remove(card1)
 			cards.remove(card2)
 			self.cpu_number += 2
-                        cards.draw(self.screen)
-			pygame.display.flip()
+	                self.text2 = Text('cpu '+str(self.cpu_number),[500,450])
 
 		else:	
 			card1.turn()
 			card2.turn()
-		        cards.draw(self.screen)
-			pygame.display.flip()
+
+                self.updateLst()
+		self.draw_all()
+                if self.card_lst == False:
+                        break
+
 
         def _update(self):
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: sys.exit()
 
-            text1 = Text('player '+str(self.player_number),[500,400])
-            text1.draw(self.screen)
+            self.text1 = Text('player '+str(self.player_number),[500,400])
+	    self.text2 = Text('cpu '+str(self.cpu_number),[500,450])
+            self.draw_all()
 
-	    text2 = Text('cpu '+str(self.cpu_number),[500,450])
-	    text2.draw(self.screen)
-
-
-            self.cpu()	
-
-            pygame.display.flip()
-
-            time.sleep(0.5)
             self.player()	
-            time.sleep(1)
 
-            self.updateLst()
+            self.draw_all()
+
+            time.sleep(0.3)
+            self.cpu()	
+            time.sleep(0.5)
+
+
 
 	def _run(self):
 	
 		ss = spritesheet.spritesheet('./img/trump.png')
 	        self.makeCards(ss)
-
                 self.screen.fill(self.black)
-				
-		
+
 		while 1:
                     self._update()
-                    if cards == False:
-                        break
-	
+
+                    	
         
             
 def main():
-	while 1:
-        	Memory()._run()
+       	Memory()._run()
 
 main()
