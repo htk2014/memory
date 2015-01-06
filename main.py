@@ -34,6 +34,7 @@ class Card(pygame.sprite.Sprite):
 			self.image = self.back_image
 		else: self.image = self.front_image
 class Text:
+
 	def __init__(self,text,location):
 		basic_font = pygame.font.SysFont(None, 48)
 
@@ -61,7 +62,6 @@ class Memory:
 
 
 	def makeCards(self,ss):
-
 		for j in range(0,6):
 			for i in range(0,10):
 				if (j*10+i) <= 51:
@@ -95,7 +95,6 @@ class Memory:
 
 							return card
         def draw_all(self):
-
             self.screen.fill(self.black)
             self.text1.draw(self.screen)
             self.text2.draw(self.screen)
@@ -124,9 +123,7 @@ class Memory:
                 if self.card_lst == False:
                         break
 
-
 	def cpu(self):
-
 		copy_cards = copy.copy(self.card_lst)
 
 		card1 = copy_cards[random.choice(range(len(copy_cards)))]
@@ -156,9 +153,7 @@ class Memory:
                 if self.card_lst == False:
                         break
 
-
         def _update(self):
-
             for event in pygame.event.get():
                 if event.type == pygame.QUIT: sys.exit()
 
@@ -174,10 +169,7 @@ class Memory:
             self.cpu()	
             time.sleep(0.5)
 
-
-
 	def _run(self):
-	
 		ss = spritesheet.spritesheet('./img/trump.png')
 	        self.makeCards(ss)
                 self.screen.fill(self.black)
