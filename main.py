@@ -120,9 +120,7 @@ class Memory:
 
                 self.updateLst()
 		self.draw_all()
-                if self.card_lst == False:
-                        break
-
+                
 	def cpu(self):
 		copy_cards = copy.copy(self.card_lst)
 
@@ -150,8 +148,6 @@ class Memory:
 
                 self.updateLst()
 		self.draw_all()
-                if self.card_lst == False:
-                        break
 
         def _update(self):
             for event in pygame.event.get():
@@ -162,9 +158,6 @@ class Memory:
             self.draw_all()
 
             self.player()	
-
-            self.draw_all()
-
             time.sleep(0.3)
             self.cpu()	
             time.sleep(0.5)
@@ -176,6 +169,8 @@ class Memory:
 
 		while 1:
                     self._update()
+                    if self.card_lst == False:
+                        break
 
                     	
         
