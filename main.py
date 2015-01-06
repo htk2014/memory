@@ -1,6 +1,6 @@
 import sys, pygame ,os, spritesheet,time,random,copy
 
-size = width, height = 1800, 1800
+size = width, height = 840, 580
 
 cards = pygame.sprite.Group()
 
@@ -54,7 +54,7 @@ class Memory:
 		
 		self.player_number = 0
 		self.cpu_number = 0
-                self.screen = pygame.display.set_mode((840,580))
+                self.screen = pygame.display.set_mode((width,height))
 
                 self.text1 = Text('player '+str(self.player_number),[500,400])
 
