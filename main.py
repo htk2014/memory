@@ -44,7 +44,6 @@ class Text:
 	def draw(self,screen):
 		screen.blit(self.text,self.location)
 
-	
 class Memory:
 
 	def __init__(self):
@@ -171,10 +170,6 @@ class Memory:
                     self._update()
                     if self.card_lst == False:
                         break
-
-                    	
-        
-            
 def main():
        	Memory()._run()
 
