@@ -1,0 +1,12 @@
+Make card -> init card
+
+Def play
+    Card1 = selectFirst()
+    Card2 = selectSecond()
+    Etc...
+
+Def selectFirst
+    Pass
+
+Def selectSecond
+    Pass
