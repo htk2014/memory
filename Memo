@@ -1,4 +1,5 @@
 Make card -> init card
+Display.flip -> Display.update
 
 Def play
     Card1 = selectFirst()
