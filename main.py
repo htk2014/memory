@@ -1,17 +1,13 @@
-import sys, pygame ,os, spritesheet,time,random,copy
+import sys, pygame ,os, spritesheet,time,random,copy,numpy
 
 size = width, height = 840, 580
+black = 0, 0, 0
 
 cards = pygame.sprite.Group()
 
 class Card(pygame.sprite.Sprite):
 	
 	def __init__(self,ss,x,y):
-
-		def allocate(x,y):
-			pos = (x+10*y)
-			self.mark = pos/13
-			self.number = pos % 13 + 1
 
 		pygame.sprite.Sprite.__init__(self,cards)
 
@@ -27,7 +23,9 @@ class Card(pygame.sprite.Sprite):
 		self.image = self.back_image
 		self.rect = self.image.get_rect() 
 
-		allocate(x,y)
+		pos = (x+10*y)
+		self.mark = pos/13
+		self.number = pos % 13 + 1
 		
 	def turn(self):
 		if self.image == self.front_image:
@@ -36,52 +34,75 @@ class Card(pygame.sprite.Sprite):
 class Text:
 
 	def __init__(self,text,location):
-		basic_font = pygame.font.SysFont(None, 48)
-
-		self.text = basic_font.render(text,True,(255, 0 , 0),(255, 255, 255))
+		self.basic_font = pygame.font.SysFont(None, 48)
+		self.text = self.basic_font.render(text,True,(255, 0 , 0),(255, 255, 255))
 		self.location = location
+	
+	def update(self,text):
+		self.text = self.basic_font.render(text,True,(255, 0 , 0),(255, 255, 255))
 
 	def draw(self,screen):
 		screen.blit(self.text,self.location)
 
-class Memory:
 
-	def __init__(self):
-		pygame.init()
-		self.black = 0, 0, 0
-		self.card_lst = []
+class GamePlayer:
+
+	def __init__(self,name,screen,textLocation):
+		self.screen = screen
+		self.cardCount = 0
+		self.name = name
+		self.text = Text(self.name+':'+str(self.cardCount),textLocation)
+		#for first drawing in main functon
+		self.text.draw(self.screen)
+
+	def selectFirst(self):
+		pass
+
+	def selectSecond(self,firstCard):
+		pass
+
+	def play(self):
+           	self.text.draw(self.screen)
 		
-		self.player_number = 0
-		self.cpu_number = 0
-                self.screen = pygame.display.set_mode((width,height))
+		successFlag = False
 
-                self.text1 = Text('player '+str(self.player_number),[500,400])
+		card1 = self.selectFirst()
+		card2 = self.selectSecond(card1)
+		#success                
+		if card1.number == card2.number:
+			cards.remove(card1)
+			cards.remove(card2)
 
-	        self.text2 = Text('cpu '+str(self.cpu_number),[500,450])
+			self.cardCount += 2
 
+			#update and draw text
+			self.screen.fill(black)
+                        self.text.update(self.name +':'+str(self.cardCount))
+            		self.text.draw(self.screen)
 
-	def makeCards(self,ss):
-		for j in range(0,6):
-			for i in range(0,10):
-				if (j*10+i) <= 51:
-       		 			Card(ss,i,j)
+			successFlag = True
+		#fail
+		else:	
+			card1.turn()
+			card2.turn()
 
-		for card in cards:
-			self.card_lst.append(card) 
+            	cards.draw(self.screen)
 
-		random.shuffle(self.card_lst)
+	    	pygame.display.update()
 
-		for j in range(0,5):
-			for i in range(0,13):
-				if (j*13+i) <= 51:
-					self.card_lst[j*13+i].rect.topleft = [25+48*i+i*card.width/5,25+64*j+j*card.height/4]				
+     	        if  cards.sprites() == []:
+                        sys.exit()
 
-        def updateLst(self):
-            self.card_lst = []
-            for card in cards:
-                self.card_lst.append(card) 
+		if successFlag:
+			self.play()
+			
+class human(GamePlayer):
+
+	def __init__(self,name,screen):
+		GamePlayer.__init__(self,name,screen,[500,400])
 
 	def selectCard(self,first_card):
+		#until player select card
 		while 1:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT: sys.exit()
@@ -91,86 +112,97 @@ class Memory:
 					for card in cards:	
 						if card.rect.collidepoint(pos) and not(first_card == card):
 							card.turn()
-
 							return card
-        def draw_all(self):
-            self.screen.fill(self.black)
-            self.text1.draw(self.screen)
-            self.text2.draw(self.screen)
-            cards.draw(self.screen)
-	    pygame.display.flip()
+	def selectFirst(self):
+		card = self.selectCard(False)
+		#draw card
+            	cards.draw(self.screen)
+	    	pygame.display.update()
 
-	def player(self):
-		card1 = self.selectCard(False)
-		self.draw_all()
+		return card
+
+	def selectSecond(self,firstCard):
+		card = self.selectCard(firstCard)
+		#draw card
+		cards.draw(self.screen)
+	    	pygame.display.update()
+
+		time.sleep(0.5)
 		
-		card2 = self.selectCard(card1)
-		self.draw_all()
+		return card
+
+class computer(GamePlayer):
+
+	def __init__(self,name,screen):
+		GamePlayer.__init__(self,name,screen,[500,450])
+
+	def selectFirst(self):
+		card_array = numpy.asarray(cards.sprites())
+		card_index = random.choice(range(len(card_array)))
+
+		card = card_array[card_index]
+
+		card.turn()
+		cards.draw(self.screen)
+		pygame.display.update()
+
 		time.sleep(0.5)
-                
-		if card1.number == card2.number:
-			cards.remove(card1)
-			cards.remove(card2)
-			self.player_number += 2
-                        self.text1 = Text('player '+str(self.player_number),[500,400])
-		else:	
-			card1.turn()
-			card2.turn()
+		
+		return card
 
-                self.updateLst()
-		self.draw_all()
-                
-	def cpu(self):
-		copy_cards = copy.copy(self.card_lst)
+	def selectSecond(self,firstCard):
+		card_list = cards.sprites()
+		card_list.remove(firstCard)
 
-		card1 = copy_cards[random.choice(range(len(copy_cards)))]
-		card1.turn()
-		self.draw_all()
+		card_array = numpy.asarray(card_list)
+		card_index = random.choice(range(len(card_array)))
+
+		card = card_array[card_index]
+		card.turn()
+
+		cards.draw(self.screen)
+		pygame.display.update()
 		time.sleep(0.5)
 
-		copy_cards.remove(card1)
+		return card
 
-		card2 = copy_cards[random.choice(range(len(copy_cards)))]
-		card2.turn()
-		self.draw_all()
-		time.sleep(0.5)
+def initCards(ss):
+	for j in range(0,6):
+		for i in range(0,10):
+			if (j*10+i) <= 51:
+       	 			Card(ss,i,j)
 
-		if card1.number == card2.number:
-			cards.remove(card1)
-			cards.remove(card2)
-			self.cpu_number += 2
-	                self.text2 = Text('cpu '+str(self.cpu_number),[500,450])
+	cardLst = []
 
-		else:	
-			card1.turn()
-			card2.turn()
+	for card in cards:
+		cardLst.append(card) 
 
-                self.updateLst()
-		self.draw_all()
+	random.shuffle(cardLst)
 
-        def _update(self):
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT: sys.exit()
-
-            self.text1 = Text('player '+str(self.player_number),[500,400])
-	    self.text2 = Text('cpu '+str(self.cpu_number),[500,450])
-            self.draw_all()
-
-            self.player()	
-            time.sleep(0.3)
-            self.cpu()	
-            time.sleep(0.5)
-
-	def _run(self):
-		ss = spritesheet.spritesheet('./img/trump.png')
-	        self.makeCards(ss)
-                self.screen.fill(self.black)
-
-		while 1:
-                    self._update()
-                    if self.card_lst == False:
-                        break
+	for j in range(0,5):
+		for i in range(0,13):
+			if (j*13+i) <= 51:
+				cardLst[j*13+i].rect.topleft = [25+48*i+i*card.width/5,25+64*j+j*card.height/4]				
 def main():
-       	Memory()._run()
+	pygame.init()
+	screen = pygame.display.set_mode((width,height))
+
+	player = human('player',screen)
+	cpu = computer('cpu',screen)
+
+	ss = spritesheet.spritesheet('./img/trump.png')
+	initCards(ss)
+
+	while 1:
+		for event in pygame.event.get():
+                	if event.type == pygame.QUIT: sys.exit()
+
+		cards.draw(screen)
+		pygame.display.update()
+
+            	player.play()	
+            	time.sleep(0.3)
+            	cpu.play()	
+            	time.sleep(0.5)
 
 main()
